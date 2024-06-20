@@ -9,24 +9,29 @@ const createStudentIntoDB = async (studentData: TStudent) => {
 
     // ---- Build in "Static Method" (StudentModel)----
 
-    // const result = await StudentModel.create(student)
+    if (await Student.isUserExists(studentData.id)) {
+
+        throw new Error('User already exists!')
+
+    }
+
+    const result = await Student.create(studentData)
+
 
     // ---- Instance Method ----
 
-    const student = new Student(studentData)
+    // const student = new Student(studentData)
 
-    if (await student.isUserExits(studentData.id)) {
+    // if (await student.isUserExits(studentData.id)) {
 
-        throw new Error('User already exists')
+    //     throw new Error('User already exists')
 
-        student.isUserExits
-
-    }
+    // }
 
 
     // ---- Build In Method ----
 
-    const result = await student.save()
+    // const result = await student.save()
 
     return result; // result => will go to the Controller
 

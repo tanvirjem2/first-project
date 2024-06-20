@@ -3,7 +3,11 @@ import { StudentServices } from "./student.service";
 
 // ---- Joi validation Schema -----
 
-import studentSchema from "./student.validation";
+// import studentSchema from "./student.validation";
+
+// ---- Zod validation Schema ----
+
+import studentValidationSchema from "./student.zod.validation";
 
 
 const createStudent = async (req: Request, res: Response) => {
@@ -12,25 +16,37 @@ const createStudent = async (req: Request, res: Response) => {
 
         // ---- Create a schema using Joi for validation ----
 
-        // ------- -------------------------------------------
+        // ------- ------------------------------------------
+
+        // ---- Create a schema using Zod for validation ----
+
+        // --------------------------------------------------
 
         const { student: studentData } = req.body;
 
-        const { error } = studentSchema.validate(studentData)
+        // ---- The studentSchema, created using Joi, is imported from the student.validation.ts file ----
+
+        // const { error, value } = studentSchema.validate(studentData)
 
         // console.log(error, value); -> For testing purpose
 
+        // ---- The studentValidationSchema, created using zod, is imported from the student.zod.validation.ts file ----
+
+        const zodParseData = studentValidationSchema.parse(studentData)
+
         // ---- Will Call Service Function to Send this Data ----
 
-        const result = await StudentServices.createStudentIntoDB(studentData)
+        const result = await StudentServices.createStudentIntoDB(zodParseData)
 
-        if (error) {
-            res.status(500).json({
-                success: false,
-                message: "An error has occurred",
-                error: error.details
-            })
-        }
+        // --- For Joi part ----
+
+        // if (error) {
+        //     res.status(500).json({
+        //         success: false,
+        //         message: "An error has occurred",
+        //         error: error.details
+        //     })
+        // }
 
 
         // ---- Send Response ----

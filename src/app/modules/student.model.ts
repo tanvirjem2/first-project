@@ -1,8 +1,11 @@
 import { Schema, model, connect } from 'mongoose';
 import { Guardian, LocalGuardian, TStudent, StudentModel, UserName } from './student/student.interface';
+import bcrypt from 'bcrypt'
 
 // ---- import Validator ----
 import validator from 'validator';
+import { func } from 'joi';
+import config from '../config';
 
 // 2. Create a Schema corresponding to the document interface.
 
@@ -66,6 +69,7 @@ const localGuardianSchema = new Schema<LocalGuardian>({
 
 const studentSchema = new Schema<TStudent, StudentModel>({
     id: { type: String, required: true, unique: true },
+    password: { type: String, required: true, unique: true, maxlength: [20, 'Password can not be more than  20 characters'] },
     name: {
         type: userNameSchema,
         required: true
@@ -112,6 +116,28 @@ const studentSchema = new Schema<TStudent, StudentModel>({
         default: 'active'
     }
 });
+
+
+// ---- Pre save middleware / hook ----
+
+studentSchema.pre('save', async function (next) {
+
+    // console.log(this, 'pre hook: We will save the data');
+
+    const user = this
+
+    user.password = await bcrypt.hash(user.password, Number(config.bcrypt_salt_rounds));
+
+    next()
+})
+
+// ---- post save middleware / hook ----
+
+studentSchema.post('save', function () {
+
+    console.log(this, 'pre hook: We saved our data');
+
+})
 
 // ---- Creating a Custom Static Method ----
 

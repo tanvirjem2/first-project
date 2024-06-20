@@ -1,13 +1,32 @@
-import StudentModel from "../student.model";
+import { Student } from "../student.model";
 
-import { Student } from "./student.interface";
+import { TStudent } from "./student.interface";
 
 
 // ---- Post ----
 
-const createStudentIntoDB = async (student: Student) => {
+const createStudentIntoDB = async (studentData: TStudent) => {
 
-    const result = await StudentModel.create(student)
+    // ---- Build in "Static Method" (StudentModel)----
+
+    // const result = await StudentModel.create(student)
+
+    // ---- Instance Method ----
+
+    const student = new Student(studentData)
+
+    if (await student.isUserExits(studentData.id)) {
+
+        throw new Error('User already exists')
+
+        student.isUserExits
+
+    }
+
+
+    // ---- Build In Method ----
+
+    const result = await student.save()
 
     return result; // result => will go to the Controller
 
@@ -17,7 +36,7 @@ const createStudentIntoDB = async (student: Student) => {
 
 const getAllStudentsFromDB = async () => {
 
-    const result = await StudentModel.find()
+    const result = await Student.find()
 
     return result;
 }
@@ -26,7 +45,7 @@ const getAllStudentsFromDB = async () => {
 
 const getSingleStudentFromDB = async (id: string) => {
 
-    const result = await StudentModel.findOne({ id })
+    const result = await Student.findOne({ id })
 
     return result;
 }

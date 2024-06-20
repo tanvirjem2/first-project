@@ -1,12 +1,51 @@
 import { Schema, model, connect } from 'mongoose';
 import { Guardian, LocalGuardian, Student, UserName } from './student/student.interface';
 
+// ---- import Validator ----
+import validator from 'validator';
+
 // 2. Create a Schema corresponding to the document interface.
 
 const userNameSchema = new Schema<UserName>({
-    firstName: { type: String, required: true },
-    middleName: { type: String },
-    lastName: { type: String, required: true }
+    // ---- For Custom Error Message ----
+    firstName: {
+        type: String,
+        required: [true, 'Please enter your first name. 📝'],
+        // ---- Trim will remove the space ----
+        trim: true,
+        maxLength: [20, 'The name must not exceed 20 characters. 🚫'],
+
+        // ---- Custom Validator ----
+
+        validate: {
+            validator: function (value: string) {
+
+                const firstNameStr = value.charAt(0).toUpperCase() + value.slice(1)
+
+                return firstNameStr === value;
+            },
+            message: 'The {VALUE} is not in capitalized format'
+        }
+
+    },
+    middleName: {
+        type: String,
+        // ---- Trim will remove the space ----
+        trim: true
+    },
+    lastName: {
+        type: String,
+        required: true,
+        // ---- Trim will remove the space ----
+        trim: true,
+
+        // ---- Custom Validator ----
+
+        validate: {
+            validator: (value: string) => validator.isAlpha(value),
+            message: 'The provided {VALUE} is not valid'
+        }
+    }
 })
 
 const guardianSchema = new Schema<Guardian>({
@@ -26,20 +65,52 @@ const localGuardianSchema = new Schema<LocalGuardian>({
 })
 
 const studentSchema = new Schema<Student>({
-    id: { type: String },
-    name: userNameSchema,
-    gender: ["male", "female"],
+    id: { type: String, required: true, unique: true },
+    name: {
+        type: userNameSchema,
+        required: true
+    },
+    gender: {
+        // ---- Validate the enum ----
+        type: String,
+        enum: ['male', 'female'],
+        required: true,
+        message: 'Gender must be specified and should be either "male" or "female".'
+    },
     dateOfBirth: { type: String },
-    email: { type: String, required: true },
-    contactNumber: { type: String, required: true },
+    email: {
+        type: String,
+        required: true,
+
+        // ---- Custom Validator ----
+
+        validate: {
+            validator: (value: string) => validator.isEmail(value),
+            message: 'The provided {VALUE} is not a valid email format'
+        }
+    },
+    contactNumber: { type: String, required: true, unique: true },
     emergencyContactNo: { type: String, required: true },
-    bloodGroup: ["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"],
+    bloodGroup: {
+        type: String,
+        enum: ["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"]
+    },
     presentAddress: { type: String, required: true },
     permanentAddress: { type: String, required: true },
-    guardian: guardianSchema,
-    localGuardian: localGuardianSchema,
+    guardian: {
+        type: guardianSchema,
+        required: true
+    },
+    localGuardian: {
+        type: localGuardianSchema,
+        required: true
+    },
     profileImage: { type: String },
-    isActive: ['active', 'blocked']
+    isActive: {
+        type: String,
+        enum: ['active', 'blocked'],
+        default: 'active'
+    }
 })
 
 // 3. Create a Model.

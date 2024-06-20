@@ -1,15 +1,37 @@
 import { Request, Response } from "express";
 import { StudentServices } from "./student.service";
 
+// ---- Joi validation Schema -----
+
+import studentSchema from "./student.validation";
+
 
 const createStudent = async (req: Request, res: Response) => {
 
     try {
+
+        // ---- Create a schema using Joi for validation ----
+
+        // ------- -------------------------------------------
+
         const { student: studentData } = req.body;
+
+        const { error } = studentSchema.validate(studentData)
+
+        // console.log(error, value); -> For testing purpose
 
         // ---- Will Call Service Function to Send this Data ----
 
         const result = await StudentServices.createStudentIntoDB(studentData)
+
+        if (error) {
+            res.status(500).json({
+                success: false,
+                message: "An error has occurred",
+                error: error.details
+            })
+        }
+
 
         // ---- Send Response ----
 
@@ -19,7 +41,11 @@ const createStudent = async (req: Request, res: Response) => {
             data: result,
         })
     } catch (err) {
-        console.log(err);
+        res.status(500).json({
+            success: false,
+            message: "An error has occurred",
+            error: err,
+        })
     }
 }
 

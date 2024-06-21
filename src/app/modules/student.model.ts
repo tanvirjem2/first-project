@@ -157,6 +157,26 @@ studentSchema.post('save', function (doc, next) {
 
 studentSchema.pre('find', async function (next) {
 
+    this.find({ isDeleted: { $ne: true } })
+
+    next();
+
+})
+
+studentSchema.pre('findOne', async function (next) {
+
+    this.find({ isDeleted: { $ne: true } })
+
+    next();
+
+})
+
+studentSchema.pre('aggregate', async function (next) {
+
+    this.pipeline().unshift({ $match: { isDeleted: { $ne: true } } })
+
+    next();
+
 })
 
 // ---- Creating a Custom Static Method ----

@@ -15,5 +15,11 @@ router.get('/', StudentControllers.getAllStudents)
 
 router.get('/:studentId', StudentControllers.getSingleStudent)
 
+// ---- Will Call Controller Function ----
+
+router.delete('/:studentId', StudentControllers.deleteStudent)
+
 
 export const StudentRoutes = router;
+
+// Router --> Service --> Controller --> Back to Router

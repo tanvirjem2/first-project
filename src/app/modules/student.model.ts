@@ -4,7 +4,7 @@ import bcrypt from 'bcrypt'
 
 // ---- import Validator ----
 import validator from 'validator';
-import { func } from 'joi';
+import { boolean, func } from 'joi';
 import config from '../config';
 
 // 2. Create a Schema corresponding to the document interface.
@@ -69,7 +69,7 @@ const localGuardianSchema = new Schema<LocalGuardian>({
 
 const studentSchema = new Schema<TStudent, StudentModel>({
     id: { type: String, required: true, unique: true },
-    password: { type: String, required: true, unique: true, maxlength: [20, 'Password can not be more than  20 characters'] },
+    password: { type: String, required: true, maxlength: [20, 'Password can not be more than  20 characters'] },
     name: {
         type: userNameSchema,
         required: true
@@ -114,8 +114,15 @@ const studentSchema = new Schema<TStudent, StudentModel>({
         type: String,
         enum: ['active', 'blocked'],
         default: 'active'
+    },
+    isDeleted: {
+        type: Boolean,
+        default: false
     }
 });
+
+
+// ---- Document Middleware ---------------------------------------------
 
 
 // ---- Pre save middleware / hook ----
@@ -133,9 +140,22 @@ studentSchema.pre('save', async function (next) {
 
 // ---- post save middleware / hook ----
 
-studentSchema.post('save', function () {
+studentSchema.post('save', function (doc, next) {
+
+    doc.password = ''
 
     console.log(this, 'pre hook: We saved our data');
+
+    next()
+})
+
+// -----------------------------------------------------------------------
+
+// ---- Query Middleware -------------------------------------------------
+
+// ---- Pre Middleware ----
+
+studentSchema.pre('find', async function (next) {
 
 })
 
